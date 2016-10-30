@@ -32,7 +32,7 @@ def load_data1(is_test):
 def max_k(num_k, is_test):
     import copy
     (n, data) = load_data1(is_test)
-    data0 = copy.deepcopy(data)
+    #data0 = copy.deepcopy(data)
     num = num_k
     head = {}
     cluster = {}
@@ -44,14 +44,21 @@ def max_k(num_k, is_test):
         min_d = None
         (u, v) = (None, None)
         for k, v in data.items():
-            cur = v[0][0]
-            q = v[0][1]
-            if head[q] == head[k]:
-                # Then they are already in the same cluster
-                continue
-            if min_d == None or min_d > cur:
-                min_d = cur
-                (p_min, q_min) = (k, v[0][1])
+            i = 0
+            while True:
+                cur = v[i][0]
+                q = v[i][1]
+                if head[q] != head[k]:
+                    # Then they are not in the same cluster
+                    if min_d == None or min_d > cur:
+                        min_d = cur
+                        (p_min, q_min) = (k, v[i][1])
+                    break
+                else:
+                    i+=1
+                    if i == len(v):
+                        break
+                    
         #print 46, (p_min, q_min), min_d
         p_head = head[p_min]
         q_head = head[q_min]
@@ -74,35 +81,14 @@ def max_k(num_k, is_test):
 
     min_d = None
     k = 0
-    '''
-    c_keys = cluster.keys()
-    while k < len(c_keys) - 1:
-        for v1 in cluster[c_keys[k]]:
-            for v2 in cluster[c_keys[k+1]]:
-                cur_d = None
-                if v1 in data:
-                    for a_tuple in data[v1]:
-                        if a_tuple[1] == v2:
-                            cur_d = a_tuple[0]
-                if cur_d == None:
-                    for a_tuple in data[v2]:
-                        if a_tuple[1] == v1:
-                            cur_d = a_tuple[0]
-                            
-                if min_d == None or min_d > cur_d:
-                    min_d = cur_d
-                    p_min = v1
-                    q_min = v2
-        k += 1
-    '''
     #print data
-    for k, v in data0.items():
+    for k, v in data.items():
         for (w, q) in v:
             if head[k] != head[q]:
                 if min_d == None or min_d > w:
                     min_d = w
                     (p_min, q_min) = (k, q)
-                
+    
     print 89, min_d, (p_min, q_min)
     return (head, cluster)
 
