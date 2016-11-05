@@ -5,7 +5,7 @@ import numpy
 start_time = time.time()
 
 def load_data():
-    file_name = 'g1.txt'
+    file_name = 'g2.txt'
     #file_name = 'HW4_test3.txt'
     lines = [line.strip('\r\n') for line in open(file_name)]
     head = lines[0].split('\t')
@@ -38,6 +38,7 @@ def load_data():
     return n, m, data
 
 def floyd_warshall():
+    global start_time
     n, m, data = load_data()
     A = []
     '''
@@ -47,51 +48,37 @@ def floyd_warshall():
             row.append([0] * (n+1))
         A.append(row)
     '''
+    # Use numpy to save more RAM
     A = numpy.zeros((n+1, n+1, n+1))
     #print A
-    '''
-    for i in range(n+1):
-        for k in range(n+1):
-            A[i][0][k] = sys.maxsize
-    '''
+
+    print 55, 'A initialized', time.time() - start_time
     
     for i in range(1, n+1):
         for j in range(1, n+1):
             if i == j:
-                
                 A[i][j][0] = 0
-            
             elif i in data and j in data[i]:
                 A[i][j][0] = data[i][j]
             else:
                 A[i][j][0] = sys.maxsize
                 #A[i][j][0] = None
-
     #return A
-
+    print 67, 'A[0] assigned', time.time() - start_time
+    
     for k in range(1, n+1):
         for i in range(1, n+1):
             for j in range(1, n+1):
                 a1 = A[i][j][k-1]
                 a2 = A[i][k][k-1]
                 a3 = A[k][j][k-1]
-                '''
-                if a2 == None or a3 == None:
-                    res = a1
-                else:
-                    res = min(a1, a2+a3)
-                '''
-                '''
-                if i == 4:
-                    print 77, i, j, k, a1, (a2, a3), a2+a3
-                '''
-                '''
-                if (k >= j and k >= i) or (k <= i and k <= j):
-                    a2 = sys.maxsize
-                '''
                 res = min(a1, a2+a3)
+                if i == j and res < 0:
+                    print 77, i, j, k
+                    return 'Negative cycle found!'
                 A[i][j][k] = res
 
+    print 80, 'A assigned', time.time() - start_time
     
     min_sp = None
     found_neg = False
@@ -105,14 +92,11 @@ def floyd_warshall():
             if min_sp == None or A[i][j][n-1] < min_sp:
                 min_sp = A[i][j][n-1]
 
-    print 70, min_sp, found_neg
+    print 94, min_sp, found_neg
     
     return A
 
 n, m, data = load_data()
 A = floyd_warshall()
-
-
-
 
 print time.time() - start_time
