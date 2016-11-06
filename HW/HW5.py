@@ -7,7 +7,7 @@ start_time = time.time()
 
 def load_data():
     file_name = 'tsp.txt'
-    file_name = 'HW5_test2.txt'
+    #file_name = 'HW5_test2.txt'
     lines = [line.strip('\r\n') for line in open(file_name)]
     n = int(lines[0])
     data = []
@@ -50,36 +50,50 @@ def dis(a, b):
 
 def tsp():
     n, data = load_data()
+    #n = 15
     S = subset(n)
     N = 0
-    for key, set in S.items():
-        
-        for i in range(len(set)):
-            set[i] = (N + i, set[i])
-        N += len(set)
-    print 50, N
+    dic_s_i = {}
+    for key, set0 in S.items():
+        for i in range(len(set0)):
+            dic_s_i[tuple(set0[i])] = N + i
+            set0[i] = (N + i, set0[i])
 
+            #print set0, a_tuple
+
+        N += len(set0)
+    print 50, N
+    
+    #print 64, dic_s_i
+    
     #return S
     A = np.zeros((N, n))
-
     
     for i in range(1, N):
         A[i][0] = sys.maxsize
 
-    
-    for m in range(1, n):
-        for idx, s in S[m+1]:
+    print 68, 'A initialized'
+    #return A
+    for m in range(2, n+1):
+        for idx, set1 in S[m]:
         #for s in S:
             
-            for j in s:
+            for j in set1:
                 if j == 1:
                     continue
                 
                 min_v = None
-                for idx0, set2 in S[m]:
-                    if j in set2:
+                set2 = set1[:]
+                set2.remove(j)
+                idx0 = dic_s_i[tuple(set2)]
+                
+                #for idx0, set2 in S[m-1]:
+                if True:
+                    '''
+                    if set(set2 + [j]) != set(set1):
                         continue
-                    for k in s:
+                    '''
+                    for k in set1:
                         if k == j:
                             continue
                         cur_dis = A[idx0][k-1] + dis(data[k-1], data[j-1])
@@ -89,6 +103,8 @@ def tsp():
                     
             #pass
 
+    print 96, 'now find the min_v2'
+
     min_v2 = None
     for j in range(1, n):
         cur_d = A[-1][j] + dis(data[j], data[0])
@@ -97,10 +113,10 @@ def tsp():
             
     print 97, min_v2
     
-    return A
+    return S, A
 
 n, data = load_data()
-A = tsp()
+S, A = tsp()
 #res = subset(24)
 
 
