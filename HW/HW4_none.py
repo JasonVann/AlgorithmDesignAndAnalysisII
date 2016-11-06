@@ -6,7 +6,7 @@ start_time = time.time()
 
 def load_data():
     file_name = 'g2.txt'
-    file_name = 'HW4_test3.txt'
+    #file_name = 'HW4_test3.txt'
     lines = [line.strip('\r\n') for line in open(file_name)]
     head = lines[0].split('\t')
     if len(head) == 1:
@@ -61,25 +61,28 @@ def floyd_warshall():
             elif i in data and j in data[i]:
                 A[i][j][0] = data[i][j]
             else:
-                A[i][j][0] = sys.maxsize
-                #A[i][j][0] = None
+                #A[i][j][0] = sys.maxsize
+                A[i][j][0] = None
     #return A
     print 67, 'A[0] assigned', time.time() - start_time
-
-    # TODO: Don't use full array
-    prev_i = A[1][:]
-    prev_k = A[1][:]
-    #return prev
+    
     for k in range(1, n+1):
         for i in range(1, n+1):
             for j in range(1, n+1):
                 a1 = A[i][j][k-1]
                 a2 = A[i][k][k-1]
                 a3 = A[k][j][k-1]
-                res = min(a1, a2+a3)
-                if i == j and res < 0:
+                if numpy.isnan(a2) or numpy.isnan(a3):
+                    res = a1
+                elif numpy.isnan(a1):
+                    res = a2 + a3
+                else:
+                    res = min(a1, a2+a3)
+                if i == j and (not numpy.isnan(res)) and res < 0:
                     print 77, i, j, k
                     return 'Negative cycle found!'
+                #print 84, a1, a2, a3, i, j, k, res
+                    
                 A[i][j][k] = res
 
     print 80, 'A assigned', time.time() - start_time
@@ -91,7 +94,7 @@ def floyd_warshall():
             #print 69, 'found negative cycle!'
             found_neg = True
         for j in range(1, n+1):
-            if A[i][j][n-1] == None:
+            if numpy.isnan(A[i][j][n-1]):
                 continue
             if min_sp == None or A[i][j][n-1] < min_sp:
                 min_sp = A[i][j][n-1]
