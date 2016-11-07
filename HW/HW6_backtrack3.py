@@ -6,8 +6,8 @@ import copy
 start_time = time.time()
 
 def load_data():
-    file_name = '2SAT1.txt'
-    #file_name = 'HW6_test5.txt'
+    file_name = '2SAT6.txt'
+    #file_name = 'HW6_test1.txt'
     lines = [line.strip('\r\n') for line in open(file_name)]
     n = int(lines[0])
     data = []
@@ -53,7 +53,8 @@ def backtrack():
     i = 0
     has_backed = False
     test_started = False
-    test1_win = True
+    test1_win = False
+    test2_win = False
     while i < len(data0):
         clause = data0[i]
         (a, b) = clause
@@ -61,52 +62,81 @@ def backtrack():
         #if False:
             bool_a1 = False
             bool_b1 = False
-            if (a > 0 and true_dic1[a] == True) or (a < 0 and true_dic1[-a] == False):
+            if (a > 0 and true_dic0[a] == True) or (a < 0 and true_dic0[-a] == False):
                 bool_a1 = True
-            if (b > 0 and true_dic1[b] == True) or (b < 0 and true_dic1[-b] == False):
+            if (b > 0 and true_dic0[b] == True) or (b < 0 and true_dic0[-b] == False):
+                bool_b1 = True
+            if (abs(a) in dic1 and dic1[abs(a)] == (a > 0)):
+                bool_a1 = True
+            if (abs(b) in dic1 and dic1[abs(b)] == (b > 0)):
                 bool_b1 = True
             if bool_a1 or bool_b1:
                 alter_OK = True
             else:
-                if true_dic1[abs(a)] == []:
-                    if true_dic1[abs(b)] == []:
+                if true_dic0[abs(a)] == [] and ((abs(a) not in dic1) or (abs(a) in dic1 and dic1[abs(a)] == [])):
+                    if true_dic0[abs(b)] == [] and ((abs(b) not in dic1) or (abs(b) in dic1 and dic1[abs(b)] == [])):
                         test1_win = True
-                        true_dic0 = true_dic1
+                        #true_dic0 = true_dic1
                         test_started = False
                     else:
-                        true_dic1[abs(a)] = a > 0
+                        #true_dic1[abs(a)] = a > 0
+                        dic1[abs(a)] = a > 0
                 else:
-                    true_dic1[abs(b)] = b > 0
+                    #true_dic1[abs(b)] = b > 0
+                    dic1[abs(b)] = b > 0
                     
         bool_a = False
         bool_b = False
+        if test1_win:
+            for k, v in dic1.items():
+                true_dic0[k] = v
+                
         if (a > 0 and true_dic0[a] == True) or (a < 0 and true_dic0[-a] == False):
             bool_a = True
         if (b > 0 and true_dic0[b] == True) or (b < 0 and true_dic0[-b] == False):
             bool_b = True
+        if test_started:
+            if (abs(a) in dic0 and dic0[abs(a)] == (a > 0)):
+                bool_a = True
+            if (abs(b) in dic0 and dic0[abs(b)] == (b > 0)):
+                bool_b = True
+                
         if bool_a or bool_b:
             i += 1
             continue
         # Then the clause is false. 
-        if true_dic0[abs(a)] == []:
+        if true_dic0[abs(a)] == [] and ((not test_started) or (test_started and abs(a) not in dic0)):
             # Default to 1st
-            if true_dic0[abs(b)] == []:
-                stack.append((clause, i, a))
+            if true_dic0[abs(b)] == [] and ((not test_started) or (test_started and abs(b) not in dic0)):
+                #stack.append((clause, i, a))
+                stack = [((clause, i, a))]
                 has_backed = False
-                test_started = True
-                true_dic1 = copy.deepcopy(true_dic0)
-                true_dic1[abs(b)] = b > 0
+                if test_started and (not test1_win):
+                    # Then a0 wins
+                    for k, v in dic0.items():
+                        true_dic0[k] = v
                 
+                test_started = True
+                #true_dic1 = copy.deepcopy(true_dic0)
+                #true_dic1[abs(b)] = b > 0
+                
+                dic1 = {}
+                dic0 = {}
+                dic1[abs(b)] = b > 0
                 test1_win = False
-                true_dic0[abs(a)] = a > 0
+                #true_dic0[abs(a)] = a > 0
+                dic0[abs(a)] = a > 0
                 i += 1
                 continue
             else:
                 a, b = b, a
-        if true_dic0[abs(b)] == []:
+        if true_dic0[abs(b)] == [] and ((not test_started) or (test_started and abs(a) not in dic0)):
             # a is set but the clause is still wrong
             #stack.append((clause, i, b))
-            true_dic0[abs(b)] = b > 0
+            if test_started:
+                dic0[abs(b)] = b > 0
+            else:
+                true_dic0[abs(b)] = b > 0
             i += 1
             continue
         # Both a, b are set and clause is wrong
@@ -136,7 +166,10 @@ def backtrack():
         i = last_i
         i += 1
         
-    print 81, true_dic0
+    #print 81, true_dic0
+    print 169
+    for k, v in dic0.items():
+        true_dic0[k] = v 
     unmet_data = verify(true_dic0, data0)
     if len(unmet_data) == 0:
         return 'Found!'
